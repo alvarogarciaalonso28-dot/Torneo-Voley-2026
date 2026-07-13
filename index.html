@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torneo de Vóley · Clasificación en vivo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23FFC531' stroke='%2310214B' stroke-width='6'/%3E%3Cpath d='M50 4 A46 46 0 0 1 50 96 M8 35 A46 46 0 0 0 92 35' fill='none' stroke='%2310214B' stroke-width='6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10214B;        /* azul noche */
+    --blue:#1D46B8;       /* azul mikasa */
+    --yellow:#FFC531;     /* amarillo mikasa */
+    --sand:#F3ECDD;       /* arena */
+    --card:#FFFDF7;
+    --live:#FF5A2D;
+    --green:#0F8A5F;
+    --gray:#8B8A83;
+    --line:#E4DCC8;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(16,33,75,.08), 0 6px 18px -8px rgba(16,33,75,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Barlow',system-ui,sans-serif;
+    background:var(--sand);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px 60px}
+
+  /* ---------- header: placa de marcador ---------- */
+  header{
+    background:var(--ink);
+    background-image:radial-gradient(1200px 300px at 50% -180px, #23388F 0%, var(--ink) 60%);
+    color:#fff;
+    padding:20px 14px 16px;
+  }
+  .head-in{max-width:760px;margin:0 auto;display:flex;gap:14px;align-items:center}
+  .ball{flex:0 0 auto;width:52px;height:52px}
+  .title-block{flex:1;min-width:0}
+  h1{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    font-size:clamp(24px,6.4vw,38px);
+    letter-spacing:.02em;
+    line-height:1;
+    color:var(--yellow);
+    text-transform:uppercase;
+  }
+  .subtitle{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;
+    color:#B9C4E8;margin-top:5px;
+  }
+  .statusbar{
+    max-width:760px;margin:14px auto 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.06em;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid rgba(255,255,255,.28);border-radius:999px;
+    padding:4px 12px;color:#EAEFFF;text-transform:uppercase;font-weight:600;
+  }
+  .chip.live{border-color:var(--live);color:#FFD9CC}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--live);animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+  @media (prefers-reduced-motion: reduce){.dot{animation:none}}
+  .updated{color:#93A0C8;margin-left:auto;display:flex;align-items:center;gap:8px}
+  .refresh-btn{
+    background:none;border:1px solid rgba(255,255,255,.28);color:#EAEFFF;
+    border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:15px;line-height:1;
+  }
+  .refresh-btn:hover{border-color:var(--yellow);color:var(--yellow)}
+  .refresh-btn:focus-visible, .tab:focus-visible, button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+
+  /* ---------- tabs ---------- */
+  nav{
+    position:sticky;top:0;z-index:20;background:var(--sand);
+    border-bottom:1px solid var(--line);
+  }
+  .tabs{max-width:760px;margin:0 auto;display:flex;gap:4px;padding:10px 14px 0;overflow-x:auto}
+  .tab{
+    font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:16px;
+    letter-spacing:.07em;text-transform:uppercase;
+    background:none;border:none;color:var(--gray);cursor:pointer;
+    padding:8px 12px 11px;border-bottom:3px solid transparent;white-space:nowrap;
+  }
+  .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--yellow)}
+
+  /* ---------- común ---------- */
+  main{padding-top:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .section-title{
+    font-family:'Anton',sans-serif;font-weight:400;font-size:18px;letter-spacing:.05em;
+    text-transform:uppercase;margin:26px 2px 10px;display:flex;align-items:baseline;gap:10px;
+  }
+  .section-title small{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--gray);letter-spacing:.1em;font-weight:600}
+  .notice{
+    border-radius:var(--radius);padding:11px 14px;font-size:14px;line-height:1.45;margin-bottom:16px;
+  }
+  .notice.demo{background:#10214B;color:#EAEFFF;border:1px solid #2A3E80}
+  .notice.demo b{color:var(--yellow)}
+  .notice.warn{background:#FFF3D1;border:1px solid #EAD089;color:#6B5410}
+  .notice.info{background:#E8F0FE;border:1px solid #C4D4F5;color:#28407C}
+  .empty{padding:34px 18px;text-align:center;color:var(--gray);font-size:15px;line-height:1.5}
+
+  /* ---------- clasificación ---------- */
+  table{width:100%;border-collapse:collapse;font-family:'Barlow Condensed',sans-serif}
+  thead th{
+    font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);
+    text-align:right;padding:11px 8px;border-bottom:1px solid var(--line);
+  }
+  thead th.t-left{text-align:left}
+  tbody td{
+    padding:9px 8px;font-size:16.5px;font-weight:600;text-align:right;
+    border-bottom:1px solid #EFE9D8;font-variant-numeric:tabular-nums;
+  }
+  tbody tr:last-child td{border-bottom:none}
+  td.t-left{text-align:left}
+  .pos{width:36px;color:var(--gray);font-weight:700}
+  tr.z-direct .pos{color:var(--green)}
+  tr.z-playin .pos{color:#C07E00}
+  tr.z-out td{color:#9C9A90}
+  tr.z-out .team-name{color:#6f6d64}
+  .team-cell{display:flex;align-items:center;gap:8px;min-width:0}
+  .team-name{font-family:'Barlow',sans-serif;font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pot-chip{
+    flex:0 0 auto;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#7D89B4;
+    border:1px solid #D5DBED;border-radius:5px;padding:1px 4px;background:#F2F5FC;
+  }
+  .tiewarn{color:#C07E00;cursor:help;font-size:13px}
+  /* la red: divisor de corte */
+  tr.net-row td{padding:0;border-bottom:none}
+  .net{
+    height:14px;
+    background-image:repeating-linear-gradient(90deg, var(--blue) 0 2px, transparent 2px 9px),
+                     repeating-linear-gradient(0deg, var(--blue) 0 2px, transparent 2px 9px);
+    opacity:.5;
+    border-top:2px solid var(--blue);
+    border-bottom:2px solid var(--blue);
+  }
+  .net.net-amber{border-color:#C07E00;background-image:repeating-linear-gradient(90deg,#C07E00 0 2px,transparent 2px 9px),repeating-linear-gradient(0deg,#C07E00 0 2px,transparent 2px 9px)}
+  .net-label{
+    font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;text-align:center;color:var(--blue);padding:3px 0 5px;
+  }
+  .net-label.amber{color:#C07E00}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;padding:12px 14px;font-size:13px;color:#5A5F73;border-top:1px solid var(--line)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:10px;height:10px;border-radius:3px}
+
+  /* ---------- partidos ---------- */
+  .round-block{margin-bottom:8px}
+  .match{
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
+    padding:11px 14px;border-bottom:1px solid #EFE9D8;
+  }
+  .match:last-child{border-bottom:none}
+  .m-team{font-weight:600;font-size:14.5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-team.right{text-align:right}
+  .m-team.winner{color:var(--ink)}
+  .m-team.loser{color:#9C9A90}
+  .m-score{
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;
+    background:var(--ink);color:#fff;border-radius:8px;padding:3px 10px;min-width:64px;text-align:center;
+    font-variant-numeric:tabular-nums;letter-spacing:.03em;
+  }
+  .m-score.pending{background:#EDE6D3;color:#9C9686}
+
+  /* ---------- play-in ---------- */
+  .rule-note{font-size:13px;color:#5A5F73;line-height:1.5;padding:2px 4px 12px}
+  .pi-card{padding:13px 14px;border-bottom:1px solid #EFE9D8}
+  .pi-card:last-child{border-bottom:none}
+  .pi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+  .pi-tag{font-family:'Barlow Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gray)}
+  .pi-state{font-family:'Barlow Condensed',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#C07E00}
+  .pi-state.done{color:var(--green)}
+  .pi-row{display:flex;align-items:center;gap:9px;padding:5px 0}
+  .seed{
+    flex:0 0 auto;width:26px;height:22px;border-radius:6px;background:#EDF0FA;color:#4A5residual689;
+    color:#4A5689;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pi-name{flex:1;font-weight:600;font-size:14.5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pi-name.q{color:var(--green)}
+  .pi-name.elim{color:#9C9A90;text-decoration:line-through}
+  .sets-dots{display:flex;gap:5px}
+  .sdot{width:13px;height:13px;border-radius:50%;border:2px solid #C9CFDF;background:transparent}
+  .sdot.won{background:var(--yellow);border-color:#D9A410}
+  .pi-sets{font-family:'Barlow Condensed',sans-serif;font-size:13.5px;color:#5A5F73;padding-top:7px;letter-spacing:.02em}
+  .pi-pts{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .pi-pts.loser{color:#B3AFA2}
+
+  /* ---------- bracket ---------- */
+  .bracket-scroll{overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+  .bracket{display:flex;gap:14px;min-width:max-content;padding:4px 2px}
+  .b-col{display:flex;flex-direction:column;justify-content:space-around;gap:10px;width:196px}
+  .b-col-title{
+    font-family:'Anton',sans-serif;font-size:13.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:#5A5F73;text-align:center;padding-bottom:2px;
+  }
+  .b-tie{background:var(--card);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
+  .b-team{display:flex;align-items:center;gap:8px;padding:8px 10px}
+  .b-team + .b-team{border-top:1px solid #EFE9D8}
+  .b-name{flex:1;font-weight:600;font-size:13.5px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .b-name.tbd{color:#ADA898;font-weight:400;font-style:italic}
+  .b-name.loser{color:#9C9A90}
+  .b-pts{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .b-pts.loser{color:#B3AFA2}
+  .b-team.winner{background:#FFF8E1}
+  .b-sets{font-family:'Barlow Condensed',sans-serif;font-size:11.5px;color:#8B8A83;padding:5px 10px 7px;border-top:1px solid #EFE9D8;letter-spacing:.03em}
+  .champion-card{
+    background:var(--ink);color:var(--yellow);border-radius:11px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:18px 12px;text-align:center;
+  }
+  .champion-card .c-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#93A0C8}
+  .champion-card .c-name{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.03em;text-transform:uppercase;line-height:1.15}
+  .trophy{font-size:26px}
+
+  /* ---------- admin / sorteo ---------- */
+  .btn{
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    font-size:15px;background:var(--ink);color:var(--yellow);border:none;border-radius:10px;
+    padding:11px 18px;cursor:pointer;
+  }
+  .btn.secondary{background:#EDE6D3;color:var(--ink)}
+  .btn:hover{filter:brightness(1.12)}
+  .admin-block{padding:16px 14px}
+  .admin-block p{font-size:14px;line-height:1.55;color:#3A4364;margin-bottom:12px}
+  .admin-block code{background:#EDE6D3;border-radius:5px;padding:1px 6px;font-size:13px}
+  textarea.tsv{
+    width:100%;height:180px;margin-top:12px;border:1px solid var(--line);border-radius:10px;
+    padding:10px;font-family:ui-monospace,monospace;font-size:12px;background:#FBF8EF;color:var(--ink);
+  }
+  .draw-summary{font-size:14px;margin:12px 0;line-height:1.5}
+  footer{
+    margin-top:44px;text-align:center;font-family:'Barlow Condensed',sans-serif;
+    font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:#A8A392;
+  }
+  footer a{color:#A8A392}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <svg class="ball" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="#FFC531" stroke="#0B1737" stroke-width="5"/>
+      <path d="M50 4 C 66 20, 66 46, 50 62 C 34 78, 34 90, 42 95" fill="none" stroke="#0B1737" stroke-width="5" stroke-linecap="round"/>
+      <path d="M5 42 C 25 34, 55 36, 72 52 C 84 63, 92 62, 95 56" fill="none" stroke="#0B1737" stroke-width="5" stroke-linecap="round"/>
+      <path d="M20 15 C 30 32, 26 58, 12 68" fill="none" stroke="#1D46B8" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <div class="title-block">
+      <h1 id="t-name">Torneo de Vóley</h1>
+      <div class="subtitle" id="t-sub">Camping · Verano 2026</div>
+    </div>
+  </div>
+  <div class="statusbar">
+    <span class="chip live" id="live-chip" hidden><span class="dot"></span>En vivo</span>
+    <span class="chip" id="phase-chip">—</span>
+    <span class="updated"><span id="updated-txt"></span>
+      <button class="refresh-btn" id="refresh" title="Actualizar" aria-label="Actualizar">↻</button>
+    </span>
+  </div>
+</header>
+
+<nav>
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-view="tabla" aria-selected="true">Clasificación</button>
+    <button class="tab" role="tab" data-view="partidos" aria-selected="false">Partidos</button>
+    <button class="tab" role="tab" data-view="final" aria-selected="false">Fase final</button>
+    <button class="tab" role="tab" data-view="sorteo" aria-selected="false" id="tab-admin" hidden>Sorteo</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div id="banners"></div>
+  <div id="view"></div>
+</main>
+
+<footer class="wrap">Se actualiza solo · organiza con cariño el de siempre 🏐</footer>
+
+<script>
+/* ==========================================================
+   CONFIGURACIÓN — edita solo esta parte
+   ========================================================== */
+const CONFIG = {
+  // MODO PRIVADO (recomendado): pega aquí la URL /exec de tu Apps Script
+  // (instrucciones en la pestaña LÉEME de la plantilla). El Sheet queda privado:
+  // nadie más que tú puede abrirlo. Si esta URL está rellena, se usa siempre.
+  DATA_URL: "",
+
+  // MODO RÁPIDO: pega aquí el ID de tu Google Sheet (lo que hay entre /d/ y /edit
+  // en la URL) con el Sheet compartido como «Cualquiera con el enlace: Lector».
+  // Con ambos vacíos ("") se muestra la demo con datos de ejemplo.
+  SHEET_ID: "1hZwmJ-jJj0dbJgN--DO0jqHXQjQmelxLdaTHfjsQmsc",
+
+  TOURNAMENT_NAME: "Torneo de Vóley",
+  SUBTITLE: "Camping · Verano 2026",
+
+  TEAMS_TAB: "Equipos",     // pestaña con columnas: Equipo | Bombo
+  MATCHES_TAB: "Partidos",  // pestaña con: Fase | Ronda | Equipo A | Equipo B | Puntos A | Puntos B
+
+  DIRECT_SPOTS: 14,            // clasificados directos a octavos (1º–14º)
+  PLAYIN_TEAMS: 4,             // equipos en el play-in (15º–18º)
+  LEAGUE_MATCHES_PER_TEAM: 4,  // partidos de liga por equipo (uno por bombo)
+  PLAYIN_ADVANTAGE: false,     // false = play-in a partido único (1 set de 15) · true = al peor clasificado le harían falta 2 sets
+  SETS_TO_WIN: { octavos: 1, cuartos: 1, semis: 2, final: 2 }, // sets para ganar cada eliminatoria (semis y final: al mejor de 3)
+
+  REFRESH_SECONDS: 60,
+};
+
+/* ==========================================================
+   LÓGICA DEL TORNEO (testeada aparte, no hace falta tocarla)
+   ========================================================== */
+/* ============================================================
+   LÓGICA DEL TORNEO (funciones puras, sin DOM)
+   Formato: liga tipo Champions (4 partidos, 1 rival por bombo)
+   → 1º-14º directos a octavos
+   → Play-in formato NBA (15º-18º), a partido único (1 set de 15):
+     15º vs 16º (ganador = seed 15); 17º vs 18º (perdedor eliminado);
+     perdedor del 15-16 vs ganador del 17-18 (ganador = seed 16).
+     Con PLAYIN_ADVANTAGE, el peor clasificado necesitaría 2 sets.
+   → Cuadro de 16 por clasificación (1v16, 2v15, ...)
+   ============================================================ */
+
+// ---------- PRNG con semilla (para demo determinista y sorteos reproducibles) ----------
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffled(arr, rng) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- Normalización ----------
+function norm(s) {
+  return String(s == null ? "" : s).trim();
+}
+function normKey(s) {
+  return norm(s).toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+const PHASE = { LIGA: "liga", PLAYIN: "playin", OCTAVOS: "octavos", CUARTOS: "cuartos", SEMIS: "semis", FINAL: "final" };
+
+function parsePhase(raw) {
+  const k = normKey(raw);
+  if (!k) return null;
+  if (k.startsWith("lig") || k === "fase liga" || k.startsWith("j")) return PHASE.LIGA;
+  if (k.includes("play") || k.includes("repesca")) return PHASE.PLAYIN;
+  if (k.startsWith("octav") || k === "1/8" || k === "8vos") return PHASE.OCTAVOS;
+  if (k.startsWith("cuart") || k === "1/4" || k === "4tos") return PHASE.CUARTOS;
+  if (k.startsWith("semi") || k === "1/2") return PHASE.SEMIS;
+  if (k.startsWith("final")) return PHASE.FINAL;
+  return null;
+}
+
+// match: {phase, round, a, b, pa, pb} — pa/pb null si no jugado
+function makeMatch(fase, ronda, a, b, pa, pb) {
+  const toPts = (v) => {
+    if (v === null || v === undefined || norm(v) === "") return null;
+    const n = Number(String(v).replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  };
+  const A = norm(a), B = norm(b);
+  if (!A || !B) return null;
+  const phase = parsePhase(fase);
+  if (!phase) return null;
+  let pA = toPts(pa), pB = toPts(pb);
+  if (pA === null || pB === null || pA === pB) { pA = null; pB = null; } // sin empates: resultado inválido = pendiente
+  return { phase, round: norm(ronda), a: A, b: B, pa: pA, pb: pB, played: pA !== null };
+}
+
+// ---------- Clasificación ----------
+// teams: [{name, pot}] ; matches: [match]
+function computeStandings(teams, matches, cfg) {
+  const table = new Map();
+  teams.forEach((t) => table.set(t.name, {
+    name: t.name, pot: t.pot, pj: 0, v: 0, d: 0, pf: 0, pc: 0, dif: 0,
+  }));
+  const league = matches.filter((m) => m.phase === PHASE.LIGA);
+  for (const m of league) {
+    if (!m.played) continue;
+    const A = table.get(m.a), B = table.get(m.b);
+    if (!A || !B) continue;
+    A.pj++; B.pj++;
+    A.pf += m.pa; A.pc += m.pb; B.pf += m.pb; B.pc += m.pa;
+    if (m.pa > m.pb) { A.v++; B.d++; } else { B.v++; A.d++; }
+  }
+  const rows = [...table.values()];
+  rows.forEach((r) => { r.dif = r.pf - r.pc; });
+  // V ↓, DIF ↓, PF ↓, nombre ↑ (último recurso determinista)
+  rows.sort((x, y) =>
+    y.v - x.v || y.dif - x.dif || y.pf - x.pf || x.name.localeCompare(y.name, "es")
+  );
+  const direct = cfg.DIRECT_SPOTS, playinEnd = cfg.DIRECT_SPOTS + cfg.PLAYIN_TEAMS;
+  rows.forEach((r, i) => {
+    r.pos = i + 1;
+    r.zone = r.pos <= direct ? "direct" : r.pos <= playinEnd ? "playin" : "out";
+    // marca de empate exacto con el de arriba (V, DIF y PF iguales)
+    const prev = rows[i - 1];
+    r.coinflip = !!prev && prev.v === r.v && prev.dif === r.dif && prev.pf === r.pf;
+  });
+  return rows;
+}
+
+function leagueStatus(teams, matches, cfg) {
+  const league = matches.filter((m) => m.phase === PHASE.LIGA);
+  const total = league.length;
+  const played = league.filter((m) => m.played).length;
+  const perTeam = new Map(teams.map((t) => [t.name, 0]));
+  league.forEach((m) => {
+    if (perTeam.has(m.a)) perTeam.set(m.a, perTeam.get(m.a) + 1);
+    if (perTeam.has(m.b)) perTeam.set(m.b, perTeam.get(m.b) + 1);
+  });
+  const uneven = [...perTeam.entries()].filter(([, n]) => n !== cfg.LEAGUE_MATCHES_PER_TEAM);
+  return {
+    total, played,
+    complete: total > 0 && played === total,
+    scheduleOk: total > 0 && uneven.length === 0,
+    uneven,
+  };
+}
+
+// ---------- Play-in (formato NBA) ----------
+// Cruce 1: 15º vs 16º — el ganador entra al cuadro como seed 15.
+// Cruce 2: 17º vs 18º — el perdedor queda eliminado.
+// Última plaza: perdedor del cruce 1 vs ganador del cruce 2 — el ganador entra como seed 16.
+// Partido único a un set; con "advantage", el peor clasificado necesitaría 2 sets.
+function pairSets(matches, phase, teamX, teamY) {
+  // devuelve sets jugados entre X e Y en esa fase: {sx, sy, sets:[{px, py}...]}
+  let sx = 0, sy = 0; const sets = [];
+  for (const m of matches) {
+    if (m.phase !== phase || !m.played) continue;
+    const direct = m.a === teamX && m.b === teamY;
+    const inverse = m.a === teamY && m.b === teamX;
+    if (!direct && !inverse) continue;
+    const px = direct ? m.pa : m.pb;
+    const py = direct ? m.pb : m.pa;
+    if (px > py) sx++; else sy++;
+    sets.push({ px, py });
+  }
+  return { sx, sy, sets };
+}
+
+function playinTie(matches, hi, lo, advantage) {
+  // hi: mejor clasificado; lo: peor. Sin ventaja: partido único (1 set).
+  // Con ventaja: a hi le basta 1 set y lo necesita 2.
+  const needHi = 1, needLo = advantage ? 2 : 1;
+  const { sx: sHi, sy: sLo, sets } = pairSets(matches, PHASE.PLAYIN, hi.name, lo.name);
+  let winner = null, loser = null;
+  if (sHi >= needHi && (advantage || sHi > sLo)) { winner = hi; loser = lo; }
+  else if (sLo >= needLo && (advantage || sLo > sHi)) { winner = lo; loser = hi; }
+  return { hi, lo, sHi, sLo, needHi, needLo, sets, winner, loser, done: !!winner };
+}
+
+function computePlayin(standings, matches, cfg) {
+  const s = (pos) => standings.find((r) => r.pos === pos) || null;
+  const D = cfg.DIRECT_SPOTS;
+  const t15 = s(D + 1), t16 = s(D + 2), t17 = s(D + 3), t18 = s(D + 4);
+  if (!t15 || !t16 || !t17 || !t18) return null;
+  const adv = !!cfg.PLAYIN_ADVANTAGE;
+  const g1 = playinTie(matches, t15, t16, adv);
+  const g2 = playinTie(matches, t17, t18, adv);
+  let g3 = null;
+  if (g1.done && g2.done) {
+    g3 = playinTie(matches, g1.loser, g2.winner, adv);
+  }
+  const seeds = {};
+  if (g1.done) seeds[D + 1] = g1.winner;
+  if (g3 && g3.done) seeds[D + 2] = g3.winner;
+  const qualified = Object.values(seeds);
+  const complete = !!(seeds[D + 1] && seeds[D + 2]);
+  return { g1, g2, g3, qualified, complete, seeds };
+}
+
+// ---------- Cuadro de 16 ----------
+const R16_ORDER = [
+  [1, 16], [8, 9], [5, 12], [4, 13],   // lado alto
+  [3, 14], [6, 11], [7, 10], [2, 15],  // lado bajo
+];
+
+function koTie(matches, phase, tA, tB, need) {
+  // ganador = el primero que alcanza "need" sets (octavos/cuartos: 1 · semis/final: 2)
+  need = need || 1;
+  if (!tA || !tB) return { a: tA, b: tB, sa: 0, sb: 0, sets: [], need, winner: null, done: false };
+  const { sx: sa, sy: sb, sets } = pairSets(matches, phase, tA.name, tB.name);
+  let winner = null;
+  if (sa >= need && sa > sb) winner = tA;
+  else if (sb >= need && sb > sa) winner = tB;
+  return { a: tA, b: tB, sa, sb, sets, need, winner, done: !!winner };
+}
+
+function computeBracket(standings, playin, matches, cfg) {
+  const S = cfg.SETS_TO_WIN || {};
+  const needFor = (k) => S[k] || 1;
+  const seedOf = (n) => {
+    if (n <= cfg.DIRECT_SPOTS) return standings.find((r) => r.pos === n) || null;
+    return playin && playin.seeds ? playin.seeds[n] || null : null;
+  };
+  const r16 = R16_ORDER.map(([hi, lo], i) => {
+    const tie = koTie(matches, PHASE.OCTAVOS, seedOf(hi), seedOf(lo), needFor("octavos"));
+    return { id: "O" + (i + 1), seeds: [hi, lo], ...tie };
+  });
+  const qf = [0, 1, 2, 3].map((i) => {
+    const t1 = r16[i * 2].winner, t2 = r16[i * 2 + 1].winner;
+    const tie = koTie(matches, PHASE.CUARTOS, t1, t2, needFor("cuartos"));
+    return { id: "C" + (i + 1), from: [r16[i * 2].id, r16[i * 2 + 1].id], ...tie };
+  });
+  const sf = [0, 1].map((i) => {
+    const t1 = qf[i * 2].winner, t2 = qf[i * 2 + 1].winner;
+    const tie = koTie(matches, PHASE.SEMIS, t1, t2, needFor("semis"));
+    return { id: "S" + (i + 1), from: [qf[i * 2].id, qf[i * 2 + 1].id], ...tie };
+  });
+  const fin = (() => {
+    const tie = koTie(matches, PHASE.FINAL, sf[0].winner, sf[1].winner, needFor("final"));
+    return { id: "F", from: ["S1", "S2"], ...tie };
+  })();
+  return { r16, qf, sf, fin, champion: fin.winner || null };
+}
+
+// ---------- Sorteo de la fase liga ----------
+// Cada equipo juega LEAGUE_MATCHES_PER_TEAM partidos, idealmente uno contra cada bombo
+// (incluido el suyo). Si los tamaños de bombo no cuadran (nº impar de equipos, bombos
+// desiguales), busca el calendario con MENOS excepciones posibles; una excepción =
+// un equipo juega 2 veces contra un mismo bombo en vez de la distribución perfecta.
+// Nunca se repite rival y todos juegan exactamente el mismo nº de partidos.
+function generateSchedule(teams, opts) {
+  const rng = (opts && opts.rng) || Math.random;
+  const attempts = (opts && opts.attempts) || 200;
+  const pots = [...new Set(teams.map((t) => t.pot))].sort((a, b) => a - b);
+  const K = pots.length; // un partido por bombo
+  const byPot = new Map(pots.map((p) => [p, teams.filter((t) => t.pot === p)]));
+
+  // plantillas de jornada para 4 bombos: 3 emparejamientos perfectos de K4 + jornada de derbis
+  const blockRound = (i, j, perm) => {
+    if (K !== 4) return 0;
+    if (i === j) return perm[3];
+    const key = [pots.indexOf(i), pots.indexOf(j)].sort().join("");
+    return key === "01" || key === "23" ? perm[0] : key === "02" || key === "13" ? perm[1] : perm[2];
+  };
+
+  let best = null;
+  for (let att = 0; att < attempts; att++) {
+    const perm = shuffled([1, 2, 3, 4], rng);
+    const playedWith = new Map(teams.map((t) => [t.name, new Set()]));
+    const roundsBusy = new Map(teams.map((t) => [t.name, new Set()]));
+    const games = []; // {a, b, jornada}
+    const leftovers = []; // {team, wantPot}
+    let ok = true;
+    const addGame = (x, y, r) => {
+      playedWith.get(x.name).add(y.name);
+      playedWith.get(y.name).add(x.name);
+      roundsBusy.get(x.name).add(r);
+      roundsBusy.get(y.name).add(r);
+      games.push({ a: x.name, b: y.name, jornada: r });
+    };
+    // 1) bipartito entre cada par de bombos
+    for (let i = 0; i < pots.length; i++) {
+      for (let j = i + 1; j < pots.length; j++) {
+        const r = blockRound(pots[i], pots[j], perm);
+        const A = shuffled(byPot.get(pots[i]), rng);
+        const B = shuffled(byPot.get(pots[j]), rng);
+        const n = Math.min(A.length, B.length);
+        for (let k = 0; k < n; k++) addGame(A[k], B[k], r);
+        for (let k = n; k < A.length; k++) leftovers.push({ team: A[k], wantPot: pots[j] });
+        for (let k = n; k < B.length; k++) leftovers.push({ team: B[k], wantPot: pots[i] });
+      }
+    }
+    // 2) derbis dentro de cada bombo
+    for (const p of pots) {
+      const r = blockRound(p, p, perm);
+      const G = shuffled(byPot.get(p), rng);
+      for (let k = 0; k + 1 < G.length; k += 2) addGame(G[k], G[k + 1], r);
+      if (G.length % 2 === 1) leftovers.push({ team: G[G.length - 1], wantPot: p });
+    }
+    // 3) resolver sobrantes emparejándolos entre sí (sin repetir rival, jornada libre común)
+    let rest = shuffled(leftovers, rng);
+    let exceptions = 0;
+    while (rest.length > 1) {
+      const me = rest.shift();
+      const compatible = (o) =>
+        o.team.name !== me.team.name &&
+        !playedWith.get(me.team.name).has(o.team.name) &&
+        freeRound(me.team, o.team) !== null;
+      const freeRound = (x, y) => {
+        for (let r = 1; r <= K; r++) {
+          if (!roundsBusy.get(x.name).has(r) && !roundsBusy.get(y.name).has(r)) return r;
+        }
+        return null;
+      };
+      let idx = rest.findIndex((o) => compatible(o) && o.team.pot === me.wantPot && me.team.pot === o.wantPot);
+      if (idx === -1) idx = rest.findIndex((o) => compatible(o) && (o.team.pot === me.wantPot || me.team.pot === o.wantPot));
+      if (idx === -1) idx = rest.findIndex((o) => compatible(o));
+      if (idx === -1) { ok = false; break; }
+      const other = rest.splice(idx, 1)[0];
+      if (other.team.pot !== me.wantPot) exceptions++;
+      if (me.team.pot !== other.wantPot) exceptions++;
+      addGame(me.team, other.team, freeRound(me.team, other.team));
+    }
+    if (!ok || rest.length > 0) continue;
+    if (!best || exceptions < best.exceptions) {
+      best = { games: games.slice(), exceptions };
+      if (exceptions === 0) break;
+    }
+  }
+  if (!best) return null;
+  const matches = best.games
+    .map((g) => ({ jornada: g.jornada, a: g.a, b: g.b }))
+    .sort((x, y) => x.jornada - y.jornada);
+  return { matches, exceptions: best.exceptions };
+}
+
+
+/* ==========================================================
+   DATOS DEMO (solo se usan si SHEET_ID está vacío o falla)
+   ========================================================== */
+const DEMO_NAMES = [
+  "Los Chiringuitos","Palmeras Beach","Sunset Spikers","Los Flamencos",
+  "Toldo Rojo","Caravana Team","Los Percebes","Media Luna",
+  "Bloqueo Total","Manos Arriba","Los Torreznos","Punto de Set",
+  "La Marea","Remate Final","Los Cangrejos","Arena Style",
+  "Parcela 47","Sombrilla Squad","Los Mosquitos","Chanclas Fuera",
+  "El Espigón","Duna Norte","Los Salaos","Vamos Playa",
+  "Kiosko Team","Los Chapuzones","Marisma","Brisa Sur",
+  "Saque y Punto","Los Veraneantes","Red y Arena","Piscina Club",
+];
+
+function buildDemo() {
+  const rng = mulberry32(20260712);
+  const teams = DEMO_NAMES.map((name, i) => ({ name, pot: Math.floor(i / 8) + 1 }));
+  const sched = generateSchedule(teams, { rng, attempts: 300 });
+  const matches = [];
+  const potOf = new Map(teams.map((t) => [t.name, t.pot]));
+  for (const m of sched.matches) {
+    const bias = (potOf.get(m.b) - potOf.get(m.a)) * 0.15;
+    const aWins = rng() < 0.5 + bias;
+    const lp = 5 + Math.floor(rng() * 9);
+    matches.push(makeMatch("Liga", "J" + m.jornada, m.a, m.b, aWins ? 15 : lp, aWins ? lp : 15));
+  }
+  // play-in en marcha (formato NBA)
+  const st = computeStandings(teams, matches, CONFIG);
+  const p = (n) => st[n - 1].name;
+  matches.push(makeMatch("Play-in", "Cruce 1", p(15), p(16), 15, 9));  // el 15º gana → seed 15
+  matches.push(makeMatch("Play-in", "Cruce 2", p(17), p(18), 12, 15)); // ¡campanada del 18º!
+  // la última plaza (16º vs 18º) está por jugar
+  return { teams, matches };
+}
+
+/* ==========================================================
+   LECTURA DE GOOGLE SHEETS (gviz, solo lectura)
+   ========================================================== */
+async function fetchTab(tab) {
+  const url = "https://docs.google.com/spreadsheets/d/" + CONFIG.SHEET_ID +
+    "/gviz/tq?tqx=out:json&headers=0&sheet=" + encodeURIComponent(tab) + "&t=" + Date.now();
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP " + res.status + " al leer «" + tab + "»");
+  const text = await res.text();
+  const start = text.indexOf("(");
+  const end = text.lastIndexOf(")");
+  if (start === -1 || end === -1) throw new Error("Respuesta inesperada de «" + tab + "»");
+  const json = JSON.parse(text.slice(start + 1, end));
+  const rows = (json.table && json.table.rows) || [];
+  return rows.map((r) => (r.c || []).map((c) => (c && c.v !== null && c.v !== undefined ? c.v : "")));
+}
+
+function parseData(teamRows, matchRows) {
+  const warnings = [];
+  const teams = [];
+  const seen = new Set();
+  for (const row of teamRows) {
+    const name = norm(row[0]);
+    if (!name || normKey(name) === "equipo") continue;
+    const pot = Number(row[1]);
+    if (!Number.isFinite(pot) || pot < 1) { warnings.push("«" + name + "» no tiene bombo válido (columna B)."); continue; }
+    if (seen.has(normKey(name))) { warnings.push("Equipo duplicado: «" + name + "»."); continue; }
+    seen.add(normKey(name));
+    teams.push({ name, pot: Math.round(pot) });
+  }
+  const canon = new Map(teams.map((t) => [normKey(t.name), t.name]));
+  const matches = [];
+  matchRows.forEach((row, i) => {
+    const fase = norm(row[0]);
+    if (!fase || normKey(fase) === "fase") return;
+    if (!parsePhase(fase)) { warnings.push("Fila " + (i + 1) + " de Partidos: fase «" + fase + "» no reconocida."); return; }
+    const a = canon.get(normKey(row[2]));
+    const b = canon.get(normKey(row[3]));
+    if (!a || !b) {
+      warnings.push("Fila " + (i + 1) + " de Partidos: equipo no encontrado en la pestaña Equipos (" + norm(row[2]) + " / " + norm(row[3]) + ").");
+      return;
+    }
+    const m = makeMatch(fase, row[1], a, b, row[4], row[5]);
+    if (m) matches.push(m);
+  });
+  return { teams, matches, warnings };
+}
+
+/* ==========================================================
+   ESTADO Y CARGA
+   ========================================================== */
+const state = {
+  teams: [], matches: [], warnings: [],
+  demo: false, lastLoad: null, loadError: null,
+  view: "tabla",
+  isAdmin: typeof location !== "undefined" && /[?#&]admin/.test(location.search + location.hash),
+  lastDraw: null,
+};
+
+async function fetchDataUrl() {
+  const url = CONFIG.DATA_URL + (CONFIG.DATA_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
+  const res = await fetch(url, { cache: "no-store", redirect: "follow" });
+  if (!res.ok) throw new Error("HTTP " + res.status + " al leer los datos");
+  const json = await res.json();
+  if (!json || !Array.isArray(json.teams) || !Array.isArray(json.matches)) throw new Error("Formato de datos inesperado");
+  return [json.teams, json.matches];
+}
+
+async function loadData() {
+  if (!CONFIG.DATA_URL && !CONFIG.SHEET_ID) {
+    const d = buildDemo();
+    Object.assign(state, { teams: d.teams, matches: d.matches, warnings: [], demo: true, lastLoad: new Date(), loadError: null });
+    return;
+  }
+  try {
+    const [teamRows, matchRows] = CONFIG.DATA_URL
+      ? await fetchDataUrl()
+      : await Promise.all([fetchTab(CONFIG.TEAMS_TAB), fetchTab(CONFIG.MATCHES_TAB)]);
+    const parsed = parseData(teamRows, matchRows);
+    Object.assign(state, { ...parsed, demo: false, lastLoad: new Date(), loadError: null });
+  } catch (err) {
+    state.loadError = err.message || String(err);
+  }
+}
+
+/* ==========================================================
+   RENDER
+   ========================================================== */
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function computeAll() {
+  const standings = computeStandings(state.teams, state.matches, CONFIG);
+  const status = leagueStatus(state.teams, state.matches, CONFIG);
+  const playin = computePlayin(standings, state.matches, CONFIG);
+  const bracket = computeBracket(standings, playin, state.matches, CONFIG);
+  return { standings, status, playin, bracket };
+}
+
+function phaseLabel(c) {
+  if (state.teams.length === 0) return "Preparando el torneo";
+  if (c.bracket.champion) return "🏆 Torneo finalizado";
+  const has = (ph) => state.matches.some((m) => m.phase === ph && m.played);
+  if (has(PHASE.FINAL)) return "¡Gran final!";
+  if (has(PHASE.SEMIS)) return "Semifinales";
+  if (has(PHASE.CUARTOS)) return "Cuartos de final";
+  if (has(PHASE.OCTAVOS)) return "Octavos de final";
+  if (c.playin && (c.playin.g1.sets.length || c.playin.g2.sets.length || (c.playin.g3 && c.playin.g3.sets.length))) return "Play-in";
+  if (!c.status.complete && c.status.played > 0) return "Fase liga · " + c.status.played + "/" + c.status.total;
+  if (c.status.complete) return "Fase liga completada";
+  return "Fase liga · por empezar";
+}
+
+function render() {
+  $("#t-name").textContent = CONFIG.TOURNAMENT_NAME;
+  $("#t-sub").textContent = CONFIG.SUBTITLE;
+  document.title = CONFIG.TOURNAMENT_NAME + " · Clasificación en vivo";
+  $("#tab-admin").hidden = !state.isAdmin;
+
+  const banners = [];
+  if (state.demo) banners.push('<div class="notice demo"><b>Modo demo.</b> Estás viendo datos de ejemplo. Para conectar tu torneo, pega el ID de tu Google Sheet en la configuración del archivo (abre la web con <code style="color:#FFC531">?admin</code> para ver las instrucciones).</div>');
+  if (state.loadError) banners.push('<div class="notice warn">No se pudo actualizar (' + esc(state.loadError) + '). Mostrando los últimos datos cargados.</div>');
+  if (!state.demo && state.warnings.length) banners.push('<div class="notice warn">' + state.warnings.length + ' aviso(s) en los datos del Sheet: ' + esc(state.warnings[0]) + (state.warnings.length > 1 ? " (y más — revisa la pestaña Sorteo)" : "") + "</div>");
+  $("#banners").innerHTML = banners.join("");
+
+  const c = computeAll();
+  $("#phase-chip").textContent = phaseLabel(c);
+  const liveNow = c.status.played > 0 && !c.bracket.champion;
+  $("#live-chip").hidden = !liveNow;
+
+  const v = state.view;
+  if (v === "tabla") renderTable(c);
+  else if (v === "partidos") renderMatches(c);
+  else if (v === "final") renderFinal(c);
+  else if (v === "sorteo") renderAdmin(c);
+  tickUpdated();
+}
+
+/* ---------- clasificación ---------- */
+function renderTable(c) {
+  if (state.teams.length === 0) { $("#view").innerHTML = '<div class="card empty">Aún no hay equipos. En cuanto se cierre la inscripción, aquí aparecerá la clasificación.</div>'; return; }
+  const rows = c.standings.map((r) => {
+    const zone = "z-" + r.zone;
+    const tie = r.coinflip ? ' <span class="tiewarn" title="Empate exacto en victorias, diferencia y puntos a favor: el orden entre estos equipos se decide por sorteo del organizador.">⚠</span>' : "";
+    let html = '<tr class="' + zone + '">' +
+      '<td class="pos">' + r.pos + "</td>" +
+      '<td class="t-left"><div class="team-cell"><span class="team-name">' + esc(r.name) + tie + '</span><span class="pot-chip">B' + r.pot + "</span></div></td>" +
+      "<td>" + r.pj + "</td><td>" + r.v + "</td><td>" + (r.dif > 0 ? "+" : "") + r.dif + "</td><td>" + r.pf + "</td></tr>";
+    if (r.pos === CONFIG.DIRECT_SPOTS) html += '<tr class="net-row"><td colspan="6"><div class="net"></div><div class="net-label">▲ Directos a octavos · ▼ Play-in</div></td></tr>';
+    if (r.pos === CONFIG.DIRECT_SPOTS + CONFIG.PLAYIN_TEAMS) html += '<tr class="net-row"><td colspan="6"><div class="net net-amber"></div><div class="net-label amber">▲ Play-in · ▼ Eliminados</div></td></tr>';
+    return html;
+  }).join("");
+  $("#view").innerHTML =
+    '<div class="card"><table><thead><tr>' +
+    '<th class="t-left" style="width:36px">#</th><th class="t-left">Equipo</th><th>PJ</th><th>V</th><th>Dif</th><th>PF</th>' +
+    "</tr></thead><tbody>" + rows + "</tbody></table>" +
+    '<div class="legend"><span><span class="sw" style="background:var(--green)"></span>1º–' + CONFIG.DIRECT_SPOTS + ": directo a octavos</span>" +
+    '<span><span class="sw" style="background:#E8A200"></span>' + (CONFIG.DIRECT_SPOTS + 1) + "º–" + (CONFIG.DIRECT_SPOTS + CONFIG.PLAYIN_TEAMS) + "º: play-in</span>" +
+    "<span>V primero · desempate por Dif y luego PF</span></div></div>";
+}
+
+/* ---------- partidos de liga ---------- */
+function renderMatches(c) {
+  const league = state.matches.filter((m) => m.phase === PHASE.LIGA);
+  if (league.length === 0) { $("#view").innerHTML = '<div class="card empty">El calendario de la fase liga aparecerá aquí cuando se haga el sorteo.</div>'; return; }
+  const byRound = new Map();
+  for (const m of league) {
+    const key = m.round || "—";
+    if (!byRound.has(key)) byRound.set(key, []);
+    byRound.get(key).push(m);
+  }
+  const keys = [...byRound.keys()].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  let html = "";
+  for (const k of keys) {
+    const ms = byRound.get(k);
+    const played = ms.filter((m) => m.played).length;
+    html += '<div class="section-title">Jornada ' + esc(k.replace(/^j/i, "")) + " <small>" + played + "/" + ms.length + " jugados</small></div>";
+    html += '<div class="card round-block">' + ms.map(renderMatchRow).join("") + "</div>";
+  }
+  $("#view").innerHTML = html;
+}
+
+function renderMatchRow(m) {
+  const aw = m.played && m.pa > m.pb, bw = m.played && m.pb > m.pa;
+  return '<div class="match">' +
+    '<div class="m-team' + (aw ? " winner" : m.played ? " loser" : "") + '">' + esc(m.a) + "</div>" +
+    (m.played
+      ? '<div class="m-score">' + m.pa + " – " + m.pb + "</div>"
+      : '<div class="m-score pending">por jugar</div>') +
+    '<div class="m-team right' + (bw ? " winner" : m.played ? " loser" : "") + '">' + esc(m.b) + "</div></div>";
+}
+
+/* ---------- fase final ---------- */
+function renderFinal(c) {
+  if (state.teams.length === 0) { $("#view").innerHTML = '<div class="card empty">La fase final se dibujará aquí sola en cuanto haya clasificación.</div>'; return; }
+  let html = "";
+  if (!c.status.complete) {
+    html += '<div class="notice info"><b>Proyección.</b> La fase liga aún no ha terminado: estos cruces muestran cómo quedaría la fase final con la clasificación de ahora mismo.</div>';
+  }
+  html += renderPlayin(c) + renderBracket(c);
+  $("#view").innerHTML = html;
+}
+
+function renderPlayin(c) {
+  const p = c.playin;
+  if (!p) return "";
+  const D = CONFIG.DIRECT_SPOTS;
+  const adv = !!CONFIG.PLAYIN_ADVANTAGE;
+  const tie = (t, tag, doneTxt, elimLoser) => {
+    const rows = [
+      { team: t.hi, sets: t.sHi, need: t.needHi, pts: (s) => s.px },
+      { team: t.lo, sets: t.sLo, need: t.needLo, pts: (s) => s.py },
+    ].map((r) => {
+      const cls = t.done ? (t.winner === r.team ? "q" : (elimLoser ? "elim" : "")) : "";
+      const right = adv
+        ? '<span class="sets-dots" title="Sets que necesita: ' + r.need + '">' + Array.from({ length: r.need }, (_, i) => '<span class="sdot' + (i < r.sets ? " won" : "") + '"></span>').join("") + "</span>"
+        : (t.sets.length ? '<span class="pi-pts' + (t.done && t.winner !== r.team ? " loser" : "") + '">' + r.pts(t.sets[0]) + "</span>" : "");
+      return '<div class="pi-row"><span class="seed">' + r.team.pos + '</span><span class="pi-name ' + cls + '">' + esc(r.team.name) + "</span>" + right + "</div>";
+    }).join("");
+    const setsTxt = adv && t.sets.length ? '<div class="pi-sets">Sets: ' + t.sets.map((s) => s.px + "–" + s.py).join(" · ") + "</div>" : "";
+    const stateTxt = t.done
+      ? '<span class="pi-state done">' + doneTxt(t) + "</span>"
+      : '<span class="pi-state">' + (t.sets.length ? "En juego" : "Por jugar") + "</span>";
+    return '<div class="pi-card"><div class="pi-head"><span class="pi-tag">' + tag + "</span>" + stateTxt + "</div>" + rows + setsTxt + "</div>";
+  };
+  let inner = tie(p.g1, "Cruce 1 · " + (D + 1) + "º vs " + (D + 2) + "º",
+    (t) => esc(t.winner.name) + " · seed " + (D + 1), false);
+  inner += tie(p.g2, "Cruce 2 · " + (D + 3) + "º vs " + (D + 4) + "º",
+    (t) => esc(t.winner.name) + " avanza", true);
+  if (p.g3) inner += tie(p.g3, "Última plaza · seed " + (D + 2),
+    (t) => esc(t.winner.name) + " · seed " + (D + 2), true);
+  else inner += '<div class="pi-card"><div class="pi-head"><span class="pi-tag">Última plaza · seed ' + (D + 2) + '</span><span class="pi-state">Esperando a los cruces</span></div><div class="pi-sets">El perdedor del cruce 1 se jugará la última plaza contra el ganador del cruce 2.</div></div>';
+  return '<div class="section-title">Play-in <small>' + (D + 1) + "º–" + (D + CONFIG.PLAYIN_TEAMS) + "º · 2 plazas</small></div>" +
+    '<div class="rule-note">' + (adv
+      ? 'Formato NBA con ventaja: al mejor clasificado de cada partido le basta <b>1 set</b>; el peor necesita <b>2</b>. El ganador del cruce 1 entra como seed ' + (D + 1) + '; el que pierda se juega la última plaza (seed ' + (D + 2) + ') contra el superviviente del cruce 2.'
+      : 'Formato NBA a <b>partido único</b> (un set de 15, como toda la fase liga). El ganador del cruce 1 entra como seed ' + (D + 1) + '; el que pierda se juega la última plaza (seed ' + (D + 2) + ') contra el superviviente del cruce 2. El perdedor del cruce 2 queda eliminado.') + "</div>" +
+    '<div class="card">' + inner + "</div>";
+}
+
+function renderBracket(c) {
+  const b = c.bracket;
+  const teamRow = (t, tie, seedNum) => {
+    if (!t) {
+      const isPI = seedNum && seedNum > CONFIG.DIRECT_SPOTS;
+      const label = seedNum ? seedNum : "?";
+      const txt = isPI ? "Se decide en el play-in" : (tie && tie.from ? "Ganador " + tie.from.join(" / ") : "Por definir");
+      return '<div class="b-team"><span class="seed">' + label + '</span><span class="b-name tbd">' + esc(txt) + "</span></div>";
+    }
+    const won = tie.done && tie.winner === t;
+    const lost = tie.done && tie.winner !== t;
+    const pts = tie.sets.length === 0 ? "" : (tie.need === 1 && tie.sets.length === 1)
+      ? (t === tie.a ? tie.sets[0].px : tie.sets[0].py)
+      : (t === tie.a ? tie.sa : tie.sb);
+    return '<div class="b-team' + (won ? " winner" : "") + '"><span class="seed">' + t.pos + '</span>' +
+      '<span class="b-name' + (lost ? " loser" : "") + '">' + esc(t.name) + "</span>" +
+      (tie.sets.length ? '<span class="b-pts' + (lost ? " loser" : "") + '">' + pts + "</span>" : "") + "</div>";
+  };
+  const tieCard = (tie, seedPair) => '<div class="b-tie">' +
+    teamRow(tie.a, tie, tie.a ? null : (seedPair ? seedPair[0] : null)) +
+    teamRow(tie.b, tie, tie.b ? null : (seedPair ? seedPair[1] : null)) +
+    (tie.need > 1 && tie.sets.length ? '<div class="b-sets">Sets: ' + tie.sets.map((s) => s.px + "–" + s.py).join(" · ") + (tie.done ? "" : " · en juego") + "</div>" : "") +
+    "</div>";
+  const col = (title, ties, seedPairs) => '<div class="b-col"><div class="b-col-title">' + title + "</div>" +
+    ties.map((t, i) => tieCard(t, seedPairs ? seedPairs[i] : null)).join("") + "</div>";
+
+  const champ = '<div class="b-col"><div class="b-col-title">Campeón</div><div class="champion-card"><span class="trophy">🏆</span>' +
+    '<span class="c-label">Campeón del torneo</span><span class="c-name">' + (b.champion ? esc(b.champion.name) : "—") + "</span></div></div>";
+
+  return '<div class="section-title">Cuadro final <small>por clasificación · 1º vs 16º…</small></div>' +
+    '<div class="rule-note">Octavos y cuartos a un set de 15 · semifinales y final al mejor de 3 sets.</div>' +
+    '<div class="bracket-scroll"><div class="bracket">' +
+    col("Octavos", b.r16, b.r16.map((t) => t.seeds)) +
+    col("Cuartos", b.qf) +
+    col("Semifinales", b.sf) +
+    col("Final", [b.fin]) +
+    champ +
+    "</div></div>";
+}
+
+/* ---------- admin: sorteo y ayuda ---------- */
+function renderAdmin(c) {
+  let html = '<div class="section-title">Zona del organizador</div>';
+  html += '<div class="card admin-block">' +
+    "<p><b>Conectar tus datos</b> (solo la primera vez, dos opciones): <b>Modo privado, recomendado</b> — el Sheet no se comparte con nadie: en el Sheet abre Extensiones → Apps Script, pega el código que viene en la pestaña LÉEME de la plantilla, Implementar → Aplicación web (Ejecutar como: tú · Acceso: cualquier usuario) y pega la URL que acaba en <code>/exec</code> en <code>CONFIG.DATA_URL</code>. <b>Modo rápido</b> — comparte el Sheet como «Cualquiera con el enlace: Lector» y pega su ID (entre <code>/d/</code> y <code>/edit</code>) en <code>CONFIG.SHEET_ID</code>; ojo: el ID viaja en el código de la web, así que un curioso podría abrir el Sheet en modo lectura (editarlo, nunca). En ambos casos, vuelve a subir el archivo a tu hosting. Después de cada partido solo rellenas la fila en la pestaña <b>Partidos</b>: la web se actualiza sola.</p>" +
+    "<p>Esta pestaña solo la ves tú (se abre añadiendo <code>?admin</code> a la dirección). Aunque alguien la encontrara, no puede tocar nada: la web es de solo lectura.</p></div>";
+
+  if (state.warnings.length) {
+    html += '<div class="section-title">Avisos de datos</div><div class="card admin-block"><p>' + state.warnings.map(esc).join("<br>") + "</p></div>";
+  }
+
+  html += '<div class="section-title">Sorteo de la fase liga</div><div class="card admin-block">' +
+    "<p>Genera el calendario: a cada equipo le toca <b>un rival de cada bombo</b> (incluido el suyo) y juega un partido por jornada. Si el número de equipos no cuadra (impar o bombos desiguales), busca el reparto con el mínimo de cruces fuera de bombo y te lo dice.</p>" +
+    '<button class="btn" id="btn-draw">Generar sorteo con los equipos actuales</button>' +
+    '<div id="draw-out"></div></div>';
+  $("#view").innerHTML = html;
+
+  const btn = $("#btn-draw");
+  if (btn) btn.addEventListener("click", () => {
+    if (state.teams.length < 4) { $("#draw-out").innerHTML = '<p class="draw-summary">Necesitas al menos 4 equipos con bombo en la pestaña Equipos.</p>'; return; }
+    const draw = generateSchedule(state.teams, { attempts: 400 });
+    state.lastDraw = draw;
+    if (!draw) { $("#draw-out").innerHTML = '<p class="draw-summary">No se encontró un calendario válido. Revisa los bombos.</p>'; return; }
+    const tsv = draw.matches.map((m) => ["Liga", "J" + m.jornada, m.a, m.b, "", ""].join("\t")).join("\n");
+    const summary = draw.exceptions === 0
+      ? "Calendario perfecto: todos los equipos juegan exactamente un rival de cada bombo. ✔"
+      : "Calendario generado con " + draw.exceptions + " cruce(s) fuera de bombo (era imposible cuadrarlo perfecto con estos números; todos juegan " + CONFIG.LEAGUE_MATCHES_PER_TEAM + " partidos igualmente).";
+    $("#draw-out").innerHTML = '<p class="draw-summary">' + summary + " " + draw.matches.length + " partidos en " + CONFIG.LEAGUE_MATCHES_PER_TEAM + " jornadas.</p>" +
+      '<button class="btn secondary" id="btn-copy">Copiar para pegar en el Sheet</button>' +
+      '<textarea class="tsv" readonly id="tsv-area">' + esc(tsv) + "</textarea>" +
+      '<p style="margin-top:8px">Pega esto en la pestaña <b>Partidos</b>, en la celda A2. Cada fila entra en su columna automáticamente. Si no te gusta el sorteo, dale otra vez al botón.</p>';
+    $("#btn-copy").addEventListener("click", async () => {
+      const area = $("#tsv-area");
+      try { await navigator.clipboard.writeText(area.value); $("#btn-copy").textContent = "¡Copiado!"; }
+      catch { area.select(); document.execCommand("copy"); $("#btn-copy").textContent = "¡Copiado!"; }
+      setTimeout(() => { const b2 = $("#btn-copy"); if (b2) b2.textContent = "Copiar para pegar en el Sheet"; }, 1800);
+    });
+  });
+}
+
+/* ---------- reloj de actualización ---------- */
+function tickUpdated() {
+  const el = $("#updated-txt");
+  if (!el) return;
+  if (!state.lastLoad) { el.textContent = "cargando…"; return; }
+  const s = Math.max(0, Math.round((Date.now() - state.lastLoad.getTime()) / 1000));
+  el.textContent = state.demo ? "demo" : s < 5 ? "actualizado ahora" : "hace " + (s < 60 ? s + " s" : Math.round(s / 60) + " min");
+}
+
+/* ---------- init ---------- */
+function initUI() {
+  document.querySelectorAll(".tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", "false"));
+      btn.setAttribute("aria-selected", "true");
+      state.view = btn.dataset.view;
+      render();
+      window.scrollTo({ top: 0 });
+    });
+  });
+  $("#refresh").addEventListener("click", async () => { await loadData(); render(); });
+  document.addEventListener("visibilitychange", async () => {
+    if (!document.hidden) { await loadData(); render(); }
+  });
+  setInterval(async () => { await loadData(); render(); }, CONFIG.REFRESH_SECONDS * 1000);
+  setInterval(tickUpdated, 5000);
+}
+
+async function init() {
+  initUI();
+  await loadData();
+  render();
+}
+
+if (typeof document !== "undefined") init();
+</script>
+</body>
+</html>
